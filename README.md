@@ -4,17 +4,17 @@
 ### **План кроків**
 
 1. Встановити docker, docker-compose;
-Створити дві головні директорії synapse, - для зберігання конфігів для бекенду і reverse_proxy, - для мережевої частини; 
-2. Створити додаткові директорії: 
+2. Створити дві головні директорії synapse, - для зберігання конфігів для бекенду і reverse_proxy, - для мережевої частини; 
+3. Створити додаткові директорії: 
    - для бекенду: `./synapse/data_1`, `./synapse/data_2`, `./synapse/postgresql/postgresql_1`, `./synapse/postgresql/postgresql_2;`
      -  для мережі: ./reverse_proxy, ./reverse_proxy/synapse_federation;
-3.  Створити файли: `docker-compose-synapse_v2.yml`,`docker-compose-reverse-proxy_v2.yml`, а також 2 файли у `/reverse_proxy/synapse_federation`, для увімкнення режиму федерації меж мікросервісами **synapse_1** і **synapse_2**.
-     - 3.1. Згенерувати homeserver.yml для synapse_1 і synapse_2;
-     - 3.2. Змінити БД з SQlite3 на PostgreSQL у homeserver.yml, або додати database.yml, а також інші точкові налаштування у директорію ./synapse/data_1/conf.d;
-     - 3.3. Заповнити файли нашіх доменів у synapse_federation для .well-known/matrix/server і .well-known/matrix/client і вказати точки монтування у docker-compose-reverse-proxy_v2.yml;
- 4. Після того як зробили підготовчі кроки, про всяк випадок перевірте все, перед запуском docker-compose-reverse-proxy_v2.yml, бо letsencrypt контейнер почне автоматичне створення сертифікатів.
- 5. Можна перевірити конфіги через вбудувану утіліту -m synapse.config перевірки конфігів homeserver.yml.
- 6. Спочатку запустіть компоуз із проксі docker-compose-reverse-proxy_v2.yml, щоб створилася мережа, а потім docker-compose-synapse_v2.yml. Якщо раптом не створилися сертифікати, то не вимикаючи компоуз із reverse proxy зупиніть і заново запустіть компоуз із бекендом synapse.
+4.  Створити файли: `docker-compose-synapse_v2.yml`,`docker-compose-reverse-proxy_v2.yml`, а також 2 файли у `/reverse_proxy/synapse_federation`, для увімкнення режиму федерації меж мікросервісами **synapse_1** і **synapse_2**.
+     - 4.1. Згенерувати homeserver.yml для synapse_1 і synapse_2;
+     - 4.2. Змінити БД з SQlite3 на PostgreSQL у homeserver.yml, або додати database.yml, а також інші точкові налаштування у директорію ./synapse/data_1/conf.d;
+     - 4.3. Заповнити файли нашіх доменів у synapse_federation для .well-known/matrix/server і .well-known/matrix/client і вказати точки монтування у docker-compose-reverse-proxy_v2.yml;
+ 5. Після того як зробили підготовчі кроки, про всяк випадок перевірте все, перед запуском docker-compose-reverse-proxy_v2.yml, бо letsencrypt контейнер почне автоматичне створення сертифікатів.
+ 6. Можна перевірити конфіги через вбудувану утіліту -m synapse.config перевірки конфігів homeserver.yml.
+ 7. Спочатку запустіть компоуз із проксі docker-compose-reverse-proxy_v2.yml, щоб створилася мережа, а потім docker-compose-synapse_v2.yml. Якщо раптом не створилися сертифікати, то не вимикаючи компоуз із reverse proxy зупиніть і заново запустіть компоуз із бекендом synapse.
 
 ### Генерація homeserver.yml
 
