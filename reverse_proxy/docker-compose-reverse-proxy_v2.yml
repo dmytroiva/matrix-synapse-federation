@@ -1,0 +1,55 @@
+#### /home/deploy/reverse_proxy/docker-compose-reverse-proxy_v2.yml
+
+version: "3.3"
+
+services:
+  synapse_proxy:
+    image: "jwilder/nginx-proxy"
+    container_name: "synapse_proxy"
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "certs:/etc/nginx/certs"
+      - "vhost:/etc/nginx/vhost.d:rw"
+      - "html:/usr/share/nginx/html:rw"
+      - "/run/docker.sock:/tmp/docker.sock:ro"
+      - "/home/deploy/reverse_proxy/synapse_federation/example-domain.name_one:/etc/nginx/vhost.d/example-domain.name_one:ro"
+      - "/home/deploy/reverse_proxy/synapse_federation/example-domain.name_two:/etc/nginx/vhost.d/example-domain.name_two:ro"
+    networks:
+      - synapse_network
+    restart: "always"
+    ports:
+      - "80:80"
+      - "443:443"
+
+  synapse_letsencrypt:
+    image: "jrcs/letsencrypt-nginx-proxy-companion"
+    container_name: "letsencrypt"
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "certs:/etc/nginx/certs:rw"
+      - "vhost:/etc/nginx/vhost.d:rw"
+      - "html:/usr/share/nginx/html:rw"
+      - "/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      NGINX_PROXY_CONTAINER: "synapse_proxy"
+    ### Added stage url for testing. To switch back, just comment out the ACME_CA_URI line
+    #      ACME_CA_URI: "https://acme-staging-v02.api.letsencrypt.org/directory"
+    networks:
+      - synapse_network
+    restart: "always"
+    depends_on:
+      - "synapse_proxy"
+
+# краще створити мережу з потрібною нам назвою, щоб докер кожного разу рандомною назвою не створював.
+# Це дозволить уникнути будь-яких проблем з іншими контейнерами, які не використовують ту саму мережу.
+# Використовуйте команду docker network create a network_name, щоб створити мережу
+networks:
+  synapse_network:
+    driver: bridge
+
+volumes:
+  certs:
+  vhost:
+  html:
