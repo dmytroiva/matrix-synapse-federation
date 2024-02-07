@@ -1,0 +1,9 @@
+location /.well-known/matrix/server {
+    return 200 '{"m.server": "example-domain.name_two:443"}';
+}
+
+location /.well-known/matrix/client {
+    return 200 '{"m.homeserver": {"base_url": "https://example-domain.name_two:8448"}}';
+    default_type application/json;
+    add_header Access-Control-Allow-Origin *;
+}

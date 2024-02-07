@@ -1,0 +1,135 @@
+### /home/deploy/synapse/docker-compose-synapse_v2.yml
+version: "3.3"
+
+services:
+  synapse_1:
+    image: "matrixdotorg/synapse:latest"
+    container_name: "synapse_1"
+    volumes:
+      - "/home/deploy/synapse/data_1:/data"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      VIRTUAL_HOST: "example-domain.name_one, example-admin-domain.name_one"
+      VIRTUAL_PORT: 8008
+      LETSENCRYPT_HOST: "example-domain.name_one, example-admin-domain.name_one"
+      SYNAPSE_SERVER_NAME: "example-domain.name_one"
+      SYNAPSE_REPORT_STATS: "yes"
+    networks:
+      - reverse_proxy_synapse_network #synapse_network
+    ports:
+      - "8008:8008"
+    links:
+      - postgresql_1
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8008/_matrix/client/versions || exit 1"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgresql_1:
+    image: postgres:latest
+    container_name: "synapse_postgresql_1"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: synapse
+      POSTGRES_USER: synapse
+      POSTGRES_DB: synapse
+      POSTGRES_INITDB_ARGS: "--encoding='UTF8' --lc-collate='C' --lc-ctype='C'"
+    networks:
+      - reverse_proxy_synapse_network #synapse_network
+    ports:
+      - "5432:5432"
+    volumes:
+      - "postgresdata_1:/var/lib/postgresql/data:rw"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+  synapse-admin_1:
+    container_name: "synapse-admin_1"
+    hostname: "synapse-admin_1"
+    build:
+      context: https://github.com/Awesome-Technologies/synapse-admin.git
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    networks:
+      - reverse_proxy_synapse_network #synapse_network
+
+  synapse_2:
+    image: "matrixdotorg/synapse:latest"
+    container_name: "synapse_2"
+    volumes:
+      - "/home/deploy/synapse/data_2:/data"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      VIRTUAL_HOST: "example-domain.name_two, example-admin-domain.name_two"
+      VIRTUAL_PORT: 8009
+      LETSENCRYPT_HOST: "example-domain.name_two, example-admin-domain.name_two"
+      SYNAPSE_SERVER_NAME: "example-domain.name_two
+      SYNAPSE_REPORT_STATS: "yes"
+    networks:
+      - reverse_proxy_synapse_network #synapse_network
+    ports:
+      - "8009:8008"
+    links:
+      - postgresql_2
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8009/_matrix/client/versions || exit 1"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgresql_2:
+    image: postgres:latest
+    container_name: "synapse_postgresql_2"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: synapse
+      POSTGRES_USER: synapse
+      POSTGRES_DB: synapse
+      POSTGRES_INITDB_ARGS: "--encoding='UTF8' --lc-collate='C' --lc-ctype='C'"
+    networks:
+      - reverse_proxy_synapse_network #synapse_network
+    ports:
+      - "5433:5432"
+    volumes:
+      - "postgresdata_2:/var/lib/postgresql/data:rw"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+
+
+  synapse-admin_2:
+    container_name: "synapse-admin_2"
+    hostname: "synapse-admin_2"
+    build:
+      context: https://github.com/Awesome-Technologies/synapse-admin.git
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+    networks:
+      - reverse_proxy_synapse_network
+
+volumes:
+  postgresdata_1:
+    driver: local
+    driver_opts:
+      type: 'none'
+      device: '/home/deploy/synapse/postgresql/postgresql_1'
+      o: 'bind'
+  postgresdata_2:
+    driver: local
+    driver_opts:
+      type: 'none'
+      device: '/home/deploy/synapse/postgresql/postgresql_2'
+      o: 'bind'
+
+networks:
+  reverse_proxy_synapse_network:
+    external: true
